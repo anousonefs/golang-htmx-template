@@ -1,0 +1,1 @@
+golang + htmx + + templ + tailwindcss

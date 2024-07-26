@@ -1,0 +1,5 @@
+.env
+/migrations
+json.json
+json2.json
+/tmp
