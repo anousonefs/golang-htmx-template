@@ -2,11 +2,16 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	"github.com/anousonefs/golang-htmx-template/internal/config"
 	"github.com/anousonefs/golang-htmx-template/internal/middleware"
 	"github.com/anousonefs/golang-htmx-template/internal/user"
 	"github.com/anousonefs/golang-htmx-template/internal/utils"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/discord"
+	"github.com/markbates/goth/providers/github"
 
 	"github.com/o1egl/paseto/v2"
 	"github.com/sirupsen/logrus"
@@ -17,8 +22,23 @@ type service struct {
 	pasetoKey []byte
 }
 
-func NewService(user user.Service, pasetoKey []byte) *service {
-	return &service{user, pasetoKey}
+func NewService(user user.Service, cfg config.Config) *service {
+
+	/* gothic.Store = nil */
+
+	goth.UseProviders(
+		github.New(
+			cfg.GetGithubClientID(),
+			cfg.GetGithubClientID(),
+			buildCallbackURL("github", cfg),
+		),
+		discord.New(
+			cfg.GetDiscordClientID(),
+			cfg.GetDiscordClientSecret(),
+			buildCallbackURL("discord", cfg),
+		),
+	)
+	return &service{user, cfg.GetPasetoSecret()}
 }
 
 func (u service) Login(ctx context.Context, req LoginRequest) (res LoginResponse, err error) {
@@ -98,4 +118,8 @@ func generateToken(secret []byte, u *user.UserDetail) (LoginResponse, error) {
 		AccessToken:  accessKey,
 		RefreshToken: refreshKey,
 	}, nil
+}
+
+func buildCallbackURL(provider string, cfg config.Config) string {
+	return fmt.Sprintf("%s:%s/auth/%s/callback", cfg.GetAppPort(), cfg.GetAppPort(), provider)
 }

@@ -76,7 +76,7 @@ func Run() error {
 	userService := user.NewService(repo, activityService)
 	user.NewHandler(e, userService, cfg).Install(e, cfg)
 
-	authService := auth.NewService(userService, cfg.GetPasetoSecret())
+	authService := auth.NewService(userService, cfg)
 	auth.NewHandler(e, authService, cfg).Install(e)
 
 	homeService := home.NewService()

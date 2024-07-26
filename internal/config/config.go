@@ -25,6 +25,23 @@ type Config struct {
 
 	oneSignalApiKey string
 	oneSignalAppID  string
+
+	githubClientID string
+
+	discordClientID     string
+	discordClientSecret string
+}
+
+func (c Config) GetGithubClientID() string {
+	return c.githubClientID
+}
+
+func (c Config) GetDiscordClientID() string {
+	return c.discordClientID
+}
+
+func (c Config) GetDiscordClientSecret() string {
+	return c.discordClientSecret
 }
 
 func (c Config) GetPasetoSecret() []byte {
@@ -81,6 +98,20 @@ func NewConfig() (config Config, err error) {
 
 	config.oneSignalApiKey = os.Getenv("ONESIGNAL_REST_API_KEY")
 	config.oneSignalAppID = os.Getenv("ONESIGNAL_APP_ID_KEY")
+
+	config.githubClientID = os.Getenv("GITHUB_CLIENT_ID")
+	if config.githubClientID == "" {
+		return config, errors.New("github client id is empty")
+	}
+	config.discordClientID = os.Getenv("DISCORD_CLIENT_ID")
+	if config.discordClientID == "" {
+		return config, errors.New("discord client id is empty")
+	}
+	config.discordClientSecret = os.Getenv("DISCORD_CLIENT_SECRET")
+	if config.discordClientSecret == "" {
+		return config, errors.New("discord client secret is empty")
+	}
+
 	return
 }
 
