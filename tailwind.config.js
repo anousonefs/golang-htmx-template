@@ -6,6 +6,7 @@ module.exports = {
     "internal/user/*.templ",
     "internal/templates/*.templ",
     "internal/home/*.templ",
+    "internal/auth/*.templ",
   ],
   theme: {
     container: {

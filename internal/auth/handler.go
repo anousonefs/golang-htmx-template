@@ -20,10 +20,19 @@ func NewHandler(app *echo.Echo, auth *service, cfg config.Config) *handler {
 	}
 }
 
-func (h handler) Install(app *echo.Echo) {
-	v1 := app.Group("/api/v1")
+func (h handler) Install(e *echo.Echo) {
+	v1 := e.Group("/api/v1")
 	v1.POST("/login", h.login)
 	v1.POST("/refresh-token", h.refreshToken)
+
+	e.GET("/login", h.loginPage)
+}
+
+func (h handler) loginPage(c echo.Context) error {
+	if err := Login().Render(c.Request().Context(), c.Response().Writer); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (h handler) login(c echo.Context) error {
