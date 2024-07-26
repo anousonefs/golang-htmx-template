@@ -13,6 +13,7 @@ import (
 	"github.com/anousonefs/golang-htmx-template/internal/activity"
 	"github.com/anousonefs/golang-htmx-template/internal/auth"
 	"github.com/anousonefs/golang-htmx-template/internal/config"
+	"github.com/anousonefs/golang-htmx-template/internal/home"
 	mdw "github.com/anousonefs/golang-htmx-template/internal/middleware"
 	"github.com/anousonefs/golang-htmx-template/internal/user"
 
@@ -77,6 +78,9 @@ func Run() error {
 
 	authService := auth.NewService(userService, cfg.GetPasetoSecret())
 	auth.NewHandler(e, authService, cfg).Install(e)
+
+	homeService := home.NewService()
+	home.NewHandler(e, homeService).Install(e)
 
 	go func() {
 		errCh <- e.Start(":" + cfg.GetAppPort())
