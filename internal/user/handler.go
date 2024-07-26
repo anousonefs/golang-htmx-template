@@ -11,6 +11,7 @@ import (
 	"github.com/anousonefs/golang-htmx-template/internal/config"
 	"github.com/anousonefs/golang-htmx-template/internal/middleware"
 	"github.com/anousonefs/golang-htmx-template/internal/templates"
+	"github.com/anousonefs/golang-htmx-template/internal/user/views"
 	"github.com/anousonefs/golang-htmx-template/internal/utils"
 
 	"github.com/labstack/echo/v4"
@@ -49,7 +50,7 @@ func (h *handler) Install(e *echo.Echo, cfg config.Config) {
 }
 
 func (h *handler) usersPage(c echo.Context) error {
-	comp := UserPage()
+	comp := views.UserPage()
 	if err := templates.Layout(comp, "My website").Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return err
 	}

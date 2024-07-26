@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 
+	"github.com/anousonefs/golang-htmx-template/internal/auth/views"
 	"github.com/anousonefs/golang-htmx-template/internal/config"
 
 	"github.com/labstack/echo/v4"
@@ -29,7 +30,7 @@ func (h handler) Install(e *echo.Echo) {
 }
 
 func (h handler) loginPage(c echo.Context) error {
-	if err := Login().Render(c.Request().Context(), c.Response().Writer); err != nil {
+	if err := views.Login().Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return err
 	}
 	return nil

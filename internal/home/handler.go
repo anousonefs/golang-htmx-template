@@ -1,6 +1,7 @@
 package home
 
 import (
+	"github.com/anousonefs/golang-htmx-template/internal/home/views"
 	"github.com/anousonefs/golang-htmx-template/internal/templates"
 
 	"github.com/labstack/echo/v4"
@@ -21,7 +22,7 @@ func (h *handler) Install(e *echo.Echo) {
 }
 
 func (h *handler) homePage(c echo.Context) error {
-	comp := HomePage()
+	comp := views.HomePage()
 	if err := templates.Layout(comp, "My website").Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return err
 	}
