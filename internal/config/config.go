@@ -27,14 +27,19 @@ type Config struct {
 	oneSignalApiKey string
 	oneSignalAppID  string
 
-	githubClientID string
+	facebookAppID     string
+	facebookAppSecret string
 
 	discordClientID     string
 	discordClientSecret string
 }
 
-func (c Config) GithubClientID() string {
-	return c.githubClientID
+func (c Config) FacebookAppID() string {
+	return c.facebookAppID
+}
+
+func (c Config) FacebookAppSecret() string {
+	return c.facebookAppSecret
 }
 
 func (c Config) DiscordClientID() string {
@@ -109,9 +114,13 @@ func NewConfig() (config Config, err error) {
 	config.oneSignalApiKey = os.Getenv("ONESIGNAL_REST_API_KEY")
 	config.oneSignalAppID = os.Getenv("ONESIGNAL_APP_ID_KEY")
 
-	config.githubClientID = os.Getenv("GITHUB_CLIENT_ID")
-	if config.githubClientID == "" {
-		return config, errors.New("github client id is empty")
+	config.facebookAppID = os.Getenv("FACEBOOK_APP_ID")
+	if config.facebookAppID == "" {
+		return config, errors.New("facebook app idis empty")
+	}
+	config.facebookAppSecret = os.Getenv("FACEBOOK_APP_SECRET")
+	if config.facebookAppSecret == "" {
+		return config, errors.New("facebook app secretis empty")
 	}
 	config.discordClientID = os.Getenv("DISCORD_CLIENT_ID")
 	if config.discordClientID == "" {

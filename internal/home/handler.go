@@ -20,7 +20,7 @@ func NewHandler(e *echo.Echo, home Service) *handler {
 }
 
 func (h *handler) Install(e *echo.Echo, cfg config.Config) {
-	e.GET("/", h.homePage, middleware.AuthPage(cfg)...)
+	e.GET("/", h.homePage, middleware.ValidateCookie(cfg)...)
 }
 
 func (h *handler) homePage(c echo.Context) error {

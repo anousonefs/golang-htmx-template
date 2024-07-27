@@ -15,7 +15,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/discord"
-	"github.com/markbates/goth/providers/github"
+	"github.com/markbates/goth/providers/facebook"
 
 	"github.com/o1egl/paseto/v2"
 	"github.com/sirupsen/logrus"
@@ -31,10 +31,10 @@ func NewService(user user.Service, store sessions.Store, cfg config.Config) *Ser
 	gothic.Store = store
 
 	goth.UseProviders(
-		github.New(
-			cfg.GithubClientID(),
-			cfg.GithubClientID(),
-			buildCallbackURL("github", cfg),
+		facebook.New(
+			cfg.FacebookAppID(),
+			cfg.FacebookAppSecret(),
+			buildCallbackURL("facebook", cfg),
 		),
 		discord.New(
 			cfg.DiscordClientID(),
@@ -59,17 +59,32 @@ func (s Service) GetSessionUser(c echo.Context) (goth.User, error) {
 	return u.(goth.User), nil
 }
 
-func (s *Service) StoreUserSession(c echo.Context, user goth.User) error {
+func (s *Service) SetCookie(c echo.Context, user goth.User) error {
 	// Get a session. We're ignoring the error resulted from decoding an
 	// existing session: Get() always returns a session, even if empty.
-	session, _ := gothic.Store.Get(c.Request(), s.cfg.SessionName())
+	session, err := gothic.Store.Get(c.Request(), s.cfg.SessionName())
+	if err != nil {
+		logrus.Errorf("StoreUserSession.Get(): %v\n", err)
+		return err
+	}
 
 	session.Values["user"] = user
 
-	err := session.Save(c.Request(), c.Response().Writer)
-	if err != nil {
+	fmt.Printf("user: %#v\n", user)
+
+	if err := session.Save(c.Request(), c.Response().Writer); err != nil {
+		logrus.Errorf("StoreUserSession.Store(): %v\n", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+
+	/* cookie := new(http.Cookie) */
+	/* cookie.Name = s.cfg.SessionName() */
+	/* cookie.Value = user.AccessToken */
+	/* cookie.Expires = time.Now().Add(25 * time.Minute) */
+	/* cookie.Path = "/" */
+	/* cookie.HttpOnly = true */
+	/**/
+	/* c.SetCookie(cookie) */
 
 	return nil
 }

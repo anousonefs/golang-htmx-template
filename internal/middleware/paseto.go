@@ -243,7 +243,7 @@ func Auth(cfg config.Config) []echo.MiddlewareFunc {
 	}
 }
 
-func AuthPage(cfg config.Config) []echo.MiddlewareFunc {
+func ValidateCookie(cfg config.Config) []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{
 		CheckCookie(cfg.SessionName()),
 	}
