@@ -1,7 +1,9 @@
 package home
 
 import (
+	"github.com/anousonefs/golang-htmx-template/internal/config"
 	"github.com/anousonefs/golang-htmx-template/internal/home/views"
+	"github.com/anousonefs/golang-htmx-template/internal/middleware"
 	"github.com/anousonefs/golang-htmx-template/internal/templates"
 
 	"github.com/labstack/echo/v4"
@@ -17,8 +19,8 @@ func NewHandler(e *echo.Echo, home Service) *handler {
 	}
 }
 
-func (h *handler) Install(e *echo.Echo) {
-	e.GET("/", h.homePage)
+func (h *handler) Install(e *echo.Echo, cfg config.Config) {
+	e.GET("/", h.homePage, middleware.AuthPage(cfg)...)
 }
 
 func (h *handler) homePage(c echo.Context) error {

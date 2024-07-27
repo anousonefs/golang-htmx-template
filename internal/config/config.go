@@ -11,14 +11,15 @@ import (
 )
 
 type Config struct {
-	dbDriver   string
-	dbHost     string
-	dbPort     string
-	dbUser     string
-	dbPassword string
-	dbName     string
-	assetDir   string
-	baseUrl    string
+	dbDriver    string
+	dbHost      string
+	dbPort      string
+	dbUser      string
+	dbPassword  string
+	dbName      string
+	assetDir    string
+	baseUrl     string
+	sessionName string
 
 	appPort      string
 	pasetoSecret []byte
@@ -32,36 +33,40 @@ type Config struct {
 	discordClientSecret string
 }
 
-func (c Config) GetGithubClientID() string {
+func (c Config) GithubClientID() string {
 	return c.githubClientID
 }
 
-func (c Config) GetDiscordClientID() string {
+func (c Config) DiscordClientID() string {
 	return c.discordClientID
 }
 
-func (c Config) GetDiscordClientSecret() string {
+func (c Config) DiscordClientSecret() string {
 	return c.discordClientSecret
 }
 
-func (c Config) GetPasetoSecret() []byte {
+func (c Config) PasetoSecret() []byte {
 	return c.pasetoSecret
 }
 
-func (c Config) GetAppPort() string {
+func (c Config) AppPort() string {
 	return c.appPort
 }
 
-func (c Config) GetDBDriver() string {
+func (c Config) DBDriver() string {
 	return c.dbDriver
 }
 
-func (c Config) GetAssetDir() string {
+func (c Config) AssetDir() string {
 	return c.assetDir
 }
 
-func (c Config) GetBaseUrl() string {
+func (c Config) BaseUrl() string {
 	return c.baseUrl
+}
+
+func (c Config) SessionName() string {
+	return c.sessionName
 }
 
 func (c Config) DSNInfo() string {
@@ -84,6 +89,7 @@ func NewConfig() (config Config, err error) {
 	config.dbPassword = os.Getenv("PGSECRET")
 	config.dbName = os.Getenv("PGDATABASE")
 	config.baseUrl = os.Getenv("BASE_URL")
+	config.sessionName = os.Getenv("SESSION_NAME")
 
 	if config.baseUrl == "" {
 		return config, errors.New("BASE_URL is empty")

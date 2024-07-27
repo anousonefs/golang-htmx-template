@@ -21,34 +21,48 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type service struct {
-	user      user.Service
-	pasetoKey []byte
+type Service struct {
+	user user.Service
+	cfg  config.Config
 }
 
-func NewService(user user.Service, store sessions.Store, cfg config.Config) *service {
+func NewService(user user.Service, store sessions.Store, cfg config.Config) *Service {
 
 	gothic.Store = store
 
 	goth.UseProviders(
 		github.New(
-			cfg.GetGithubClientID(),
-			cfg.GetGithubClientID(),
+			cfg.GithubClientID(),
+			cfg.GithubClientID(),
 			buildCallbackURL("github", cfg),
 		),
 		discord.New(
-			cfg.GetDiscordClientID(),
-			cfg.GetDiscordClientSecret(),
+			cfg.DiscordClientID(),
+			cfg.DiscordClientSecret(),
 			buildCallbackURL("discord", cfg),
 		),
 	)
-	return &service{user, cfg.GetPasetoSecret()}
+	return &Service{user, cfg}
 }
 
-func (s *service) StoreUserSession(c echo.Context, user goth.User) error {
+func (s Service) GetSessionUser(c echo.Context) (goth.User, error) {
+	session, err := gothic.Store.Get(c.Request(), s.cfg.SessionName())
+	if err != nil {
+		return goth.User{}, err
+	}
+
+	u := session.Values["user"]
+	if u == nil {
+		return goth.User{}, fmt.Errorf("user is not authenticated! %v", u)
+	}
+
+	return u.(goth.User), nil
+}
+
+func (s *Service) StoreUserSession(c echo.Context, user goth.User) error {
 	// Get a session. We're ignoring the error resulted from decoding an
 	// existing session: Get() always returns a session, even if empty.
-	session, _ := gothic.Store.Get(c.Request(), SessionName)
+	session, _ := gothic.Store.Get(c.Request(), s.cfg.SessionName())
 
 	session.Values["user"] = user
 
@@ -60,24 +74,24 @@ func (s *service) StoreUserSession(c echo.Context, user goth.User) error {
 	return nil
 }
 
-func (u service) Login(ctx context.Context, req LoginRequest) (res LoginResponse, err error) {
-	user, err := u.user.GetUser(ctx, user.FilterUser{Username: req.Username})
+func (s Service) Login(ctx context.Context, req LoginRequest) (res LoginResponse, err error) {
+	user, err := s.user.GetUser(ctx, user.FilterUser{Username: req.Username})
 	if err != nil {
 		return LoginResponse{}, err
 	}
 	if err := utils.ComparePassword(req.Password, user.Password); err != nil {
 		return LoginResponse{}, err
 	}
-	return generateToken(u.pasetoKey, user)
+	return generateToken(s.cfg.PasetoSecret(), user)
 }
 
-func (u service) RefreshToken(ctx context.Context, req RefreshTokenRequest) (res LoginResponse, err error) {
+func (s Service) RefreshToken(ctx context.Context, req RefreshTokenRequest) (res LoginResponse, err error) {
 	defer func() {
 		if err != nil {
 			logrus.Errorf("u.RefreshToken: %v\n", err)
 		}
 	}()
-	claims, err := u.verifyIDToken(ctx, req.RefreshToken)
+	claims, err := s.verifyIDToken(ctx, req.RefreshToken)
 	if err != nil {
 		return LoginResponse{}, ErrUnProcessAbleEntity
 	}
@@ -85,20 +99,20 @@ func (u service) RefreshToken(ctx context.Context, req RefreshTokenRequest) (res
 	if err := claims.Get("renewable", &renewable); err != nil || !renewable {
 		return LoginResponse{}, ErrInternalServerError
 	}
-	user, err := u.user.GetUser(ctx, user.FilterUser{Username: claims.Subject})
+	user, err := s.user.GetUser(ctx, user.FilterUser{Username: claims.Subject})
 	if err != nil {
 		return LoginResponse{}, err
 	}
-	res, err = generateToken(u.pasetoKey, user)
+	res, err = generateToken(s.cfg.PasetoSecret(), user)
 	if err != nil {
 		return LoginResponse{}, ErrInternalServerError
 	}
 	return res, nil
 }
 
-func (u *service) verifyIDToken(_ context.Context, idToken string) (paseto.JSONToken, error) {
+func (s *Service) verifyIDToken(_ context.Context, idToken string) (paseto.JSONToken, error) {
 	claims := paseto.JSONToken{}
-	if err := paseto.Decrypt(idToken, u.pasetoKey, &claims, nil); err != nil {
+	if err := paseto.Decrypt(idToken, s.cfg.PasetoSecret(), &claims, nil); err != nil {
 		return claims, err
 	}
 	if err := claims.Validate(); err != nil {
@@ -140,5 +154,5 @@ func generateToken(secret []byte, u *user.UserDetail) (LoginResponse, error) {
 }
 
 func buildCallbackURL(provider string, cfg config.Config) string {
-	return fmt.Sprintf("%s:%s/auth/callback?provider=%s", cfg.GetBaseUrl(), cfg.GetAppPort(), provider)
+	return fmt.Sprintf("%s:%s/auth/callback?provider=%s", cfg.BaseUrl(), cfg.AppPort(), provider)
 }

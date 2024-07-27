@@ -39,7 +39,7 @@ func Run() error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
 	defer cancel()
 
-	db, err := sql.Open(cfg.GetDBDriver(), cfg.DSNInfo())
+	db, err := sql.Open(cfg.DBDriver(), cfg.DSNInfo())
 	if err != nil {
 		return err
 	}
@@ -89,10 +89,10 @@ func Run() error {
 	auth.NewHandler(e, authService, cfg).Install(e)
 
 	homeService := home.NewService()
-	home.NewHandler(e, homeService).Install(e)
+	home.NewHandler(e, homeService).Install(e, cfg)
 
 	go func() {
-		errCh <- e.Start(":" + cfg.GetAppPort())
+		errCh <- e.Start(":" + cfg.AppPort())
 	}()
 
 	select {

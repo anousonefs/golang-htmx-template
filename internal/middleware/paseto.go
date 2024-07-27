@@ -9,6 +9,9 @@ import (
 	"time"
 
 	"github.com/anousonefs/golang-htmx-template/internal/config"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
+	"github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -79,6 +82,18 @@ type PASETOConfig struct {
 	/* Redis *redis.Client */
 }
 
+func CheckCookie(sesssionName string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			if _, err := GetSessionUser(c.Request(), sesssionName); err != nil {
+				logrus.Errorf("GetSessionUser(): %v\n", err)
+				return c.Redirect(http.StatusTemporaryRedirect, "/login")
+			}
+			return next(c)
+		}
+	}
+}
+
 func PASETOWithConfig(config PASETOConfig) echo.MiddlewareFunc {
 	if len(config.SigningKey) != keySize {
 		log.Fatal("SigningKey must be 32 bytes length")
@@ -115,6 +130,7 @@ func PASETOWithConfig(config PASETOConfig) echo.MiddlewareFunc {
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) (err error) {
+
 			if config.Skipper(c) {
 				return next(c)
 			}
@@ -215,13 +231,34 @@ func Auth(cfg config.Config) []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{
 		PASETOWithConfig(PASETOConfig{
 			Skipper:    func(c echo.Context) bool { return c.Path() == "/_healthz" },
-			SigningKey: cfg.GetPasetoSecret(),
+			SigningKey: cfg.PasetoSecret(),
 			ErrorHandlerWithContext: func(err error, c echo.Context) error {
 				httpStatus := HttpStatusPbFromRPC(GRPCStatusFromErr(err))
 				b, _ := protojson.Marshal(httpStatus)
 				return c.JSONBlob(int(httpStatus.Error.Code), b)
 			},
-		}),
+		},
+		),
 		SetClaimsMiddleware(),
 	}
+}
+
+func AuthPage(cfg config.Config) []echo.MiddlewareFunc {
+	return []echo.MiddlewareFunc{
+		CheckCookie(cfg.SessionName()),
+	}
+}
+
+func GetSessionUser(r *http.Request, sessionName string) (goth.User, error) {
+	session, err := gothic.Store.Get(r, sessionName)
+	if err != nil {
+		return goth.User{}, err
+	}
+
+	u := session.Values["user"]
+	if u == nil {
+		return goth.User{}, fmt.Errorf("user is not authenticated! %v", u)
+	}
+
+	return u.(goth.User), nil
 }

@@ -14,10 +14,10 @@ import (
 )
 
 type handler struct {
-	auth *service
+	auth *Service
 }
 
-func NewHandler(app *echo.Echo, auth *service, cfg config.Config) *handler {
+func NewHandler(app *echo.Echo, auth *Service, cfg config.Config) *handler {
 	return &handler{
 		auth,
 	}
