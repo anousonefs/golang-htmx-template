@@ -3,13 +3,17 @@ package auth
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/anousonefs/golang-htmx-template/internal/config"
 	"github.com/anousonefs/golang-htmx-template/internal/middleware"
 	"github.com/anousonefs/golang-htmx-template/internal/user"
 	"github.com/anousonefs/golang-htmx-template/internal/utils"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo/v4"
 	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/discord"
 	"github.com/markbates/goth/providers/github"
 
@@ -22,9 +26,9 @@ type service struct {
 	pasetoKey []byte
 }
 
-func NewService(user user.Service, cfg config.Config) *service {
+func NewService(user user.Service, store sessions.Store, cfg config.Config) *service {
 
-	/* gothic.Store = nil */
+	gothic.Store = store
 
 	goth.UseProviders(
 		github.New(
@@ -39,6 +43,21 @@ func NewService(user user.Service, cfg config.Config) *service {
 		),
 	)
 	return &service{user, cfg.GetPasetoSecret()}
+}
+
+func (s *service) StoreUserSession(c echo.Context, user goth.User) error {
+	// Get a session. We're ignoring the error resulted from decoding an
+	// existing session: Get() always returns a session, even if empty.
+	session, _ := gothic.Store.Get(c.Request(), SessionName)
+
+	session.Values["user"] = user
+
+	err := session.Save(c.Request(), c.Response().Writer)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return nil
 }
 
 func (u service) Login(ctx context.Context, req LoginRequest) (res LoginResponse, err error) {
@@ -121,5 +140,5 @@ func generateToken(secret []byte, u *user.UserDetail) (LoginResponse, error) {
 }
 
 func buildCallbackURL(provider string, cfg config.Config) string {
-	return fmt.Sprintf("%s:%s/auth/%s/callback", cfg.GetAppPort(), cfg.GetAppPort(), provider)
+	return fmt.Sprintf("%s:%s/auth/callback?provider=%s", cfg.GetBaseUrl(), cfg.GetAppPort(), provider)
 }

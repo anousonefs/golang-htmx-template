@@ -60,6 +60,10 @@ func (c Config) GetAssetDir() string {
 	return c.assetDir
 }
 
+func (c Config) GetBaseUrl() string {
+	return c.baseUrl
+}
+
 func (c Config) DSNInfo() string {
 	timeoutOption := fmt.Sprintf("-c statement_timeout=%d", 10*time.Minute/time.Millisecond)
 	return fmt.Sprintf("user='%s' password='%s' host='%s' port=%s dbname='%s' sslmode=disable options='%s'", c.dbUser, c.dbPassword, c.dbHost, c.dbPort, c.dbName, timeoutOption)

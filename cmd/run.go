@@ -16,6 +16,8 @@ import (
 	"github.com/anousonefs/golang-htmx-template/internal/home"
 	mdw "github.com/anousonefs/golang-htmx-template/internal/middleware"
 	"github.com/anousonefs/golang-htmx-template/internal/user"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 
 	casbinPgAdapter "github.com/cychiuae/casbin-pg-adapter"
 	"github.com/labstack/echo/v4"
@@ -76,7 +78,14 @@ func Run() error {
 	userService := user.NewService(repo, activityService)
 	user.NewHandler(e, userService, cfg).Install(e, cfg)
 
-	authService := auth.NewService(userService, cfg)
+	sessionStore := auth.NewCookieStore(auth.SessionOptions{
+		CookiesKey: "mycookies7898",
+		MaxAge:     1000,
+		Secure:     false,
+		HttpOnly:   false,
+	})
+
+	authService := auth.NewService(userService, sessionStore, cfg)
 	auth.NewHandler(e, authService, cfg).Install(e)
 
 	homeService := home.NewService()
@@ -112,6 +121,7 @@ func newEchoServer(_ config.Config) *echo.Echo {
 	}
 	e := echo.New()
 	e.Use(mdw.CSPMiddleware)
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
 	pwd, _ := os.Getwd()
 	e.Static("static", fmt.Sprintf("%v/static", pwd))
