@@ -98,8 +98,12 @@ func (h handler) authCallback(c echo.Context) error {
 		logrus.Errorf("authCallback.CompleteUserAuth(): %v\n", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	err = h.auth.SetCookie(c, user)
+	tokens, err := h.auth.genToken(c.Request().Context(), user.Email)
 	if err != nil {
+		return err
+	}
+
+	if err := h.auth.SetCookie(c, tokens); err != nil {
 		logrus.Printf("authCallback.StoreUserSession(): %v\n", err)
 		return c.String(http.StatusInternalServerError, "Error storing user session")
 	}

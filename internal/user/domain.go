@@ -43,7 +43,6 @@ const (
 
 type UserList struct {
 	ID           string     `json:"id"`
-	Username     string     `json:"username"`
 	FirstName    string     `json:"firstName"`
 	LastName     string     `json:"lastName"`
 	RoleID       string     `json:"roleID"`
@@ -65,7 +64,6 @@ type UserList struct {
 
 type UserDetail struct {
 	ID           string `json:"id"`
-	Username     string `json:"username"`
 	DepartmentID string `json:"departmentID"`
 	Role         struct {
 		ID   string `json:"id"`
@@ -95,6 +93,7 @@ func (f User) Validate() error {
 type FilterUser struct {
 	ID       string
 	Username string
+	Email    string
 	Phone    string
 }
 
@@ -108,6 +107,9 @@ func (f FilterUser) ToSql() (string, []interface{}, error) {
 	}
 	if f.Phone != "" {
 		eq["u.phone"] = f.Phone
+	}
+	if f.Email != "" {
+		eq["u.email"] = f.Email
 	}
 	return eq.ToSql()
 }

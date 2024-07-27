@@ -85,8 +85,8 @@ type PASETOConfig struct {
 func CheckCookie(sesssionName string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if _, err := GetSessionUser(c.Request(), sesssionName); err != nil {
-				logrus.Errorf("GetSessionUser(): %v\n", err)
+			if accessToken, refreshToken, err := GetCookies(c); err != nil || accessToken == "" || refreshToken == "" {
+				logrus.Errorf("GetCookies(): %v\n", err)
 				return c.Redirect(http.StatusTemporaryRedirect, "/login")
 			}
 			return next(c)
@@ -261,4 +261,24 @@ func GetSessionUser(r *http.Request, sessionName string) (goth.User, error) {
 	}
 
 	return u.(goth.User), nil
+}
+
+func GetCookies(c echo.Context) (accessToken, refreshToken string, err error) {
+	accessTokenCookie, err := c.Cookie("access_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return "", "", fmt.Errorf("access token cookie not found")
+		}
+		return "", "", fmt.Errorf("error retrieving access token cookie: %v", err)
+	}
+
+	refreshTokenCookie, err := c.Cookie("refresh_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return "", "", fmt.Errorf("refresh token cookie not found")
+		}
+		return "", "", fmt.Errorf("error retrieving refresh token cookie: %v", err)
+	}
+
+	return accessTokenCookie.Value, refreshTokenCookie.Value, nil
 }

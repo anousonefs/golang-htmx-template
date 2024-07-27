@@ -33,7 +33,6 @@ func (r Repo) listUsers(ctx context.Context, filter FilterUser) ([]UserList, err
 	query, args := config.Psql().
 		Select(
 			"u.id",
-			"u.username",
 			"u.first_name",
 			"u.last_name",
 			"u.role_id",
@@ -64,7 +63,6 @@ func (r Repo) listUsers(ctx context.Context, filter FilterUser) ([]UserList, err
 		var i UserList
 		if err := rows.Scan(
 			&i.ID,
-			&i.Username,
 			&i.FirstName,
 			&i.LastName,
 			&i.RoleID,
@@ -139,7 +137,6 @@ func (r Repo) getUser(ctx context.Context, filter FilterUser) (res *UserDetail, 
 			"u.id",
 			"r.id",
 			"r.code",
-			"u.username",
 			"u.first_name",
 			"u.last_name",
 			"u.gender",
@@ -162,7 +159,6 @@ func (r Repo) getUser(ctx context.Context, filter FilterUser) (res *UserDetail, 
 		&i.ID,
 		&i.Role.ID,
 		&i.Role.Name,
-		&i.Username,
 		&i.FirstName,
 		&i.LastName,
 		&i.Gender,
