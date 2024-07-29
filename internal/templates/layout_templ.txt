@@ -3,12 +3,18 @@
 \"></script><script src=\"static/script/response-targets.js\" nonce=\"
 \"></script><link rel=\"stylesheet\" href=\"static/css/style.css\" nonce=\"
 \"></head>
-<footer class=\"bg-primary-600 p-4\"></footer>
+<div class=\"w-64 h-screen bg-gray-900 shadow-md fixed\"><div class=\"p-4 text-gray-100 text-xl\"><img src=\"static/logo/iot.jpg\" alt=\"AIDC Trading Logo\" class=\"w-full mb-4\"><div class=\"p-2.5 mt-1 flex items-center rounded-md \"><h1 class=\"text-[15px]  ml-3 text-xl text-white font-bold\">Tailwindbar</h1></div><hr class=\"my-2 text-gray-600\"><div><div class=\"p-2.5 mt-3 flex items-center rounded-md \n                  px-4 duration-300 cursor-pointer  bg-gray-700\"><input class=\"text-[15px] ml-4 w-full bg-transparent focus:outline-none\" placeholder=\"Serach\"></div><div class=\"p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600\"><span class=\"text-[15px] ml-4 text-gray-200\">Home</span></div><div class=\"p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600\"><span class=\"text-[15px] ml-4 text-gray-200\">Bookmark</span></div><hr class=\"my-4 text-gray-600\"><div class=\"p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600\"><span class=\"text-[15px] ml-4 text-gray-200\">Messages</span></div><div class=\"p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600\"><i class=\"fas fa-search text-sm\"></i><div class=\"flex justify-between w-full items-center\" onclick=\"dropDown()\"><span class=\"text-[15px] ml-4 text-gray-200\">Chatbox</span> <span class=\"text-sm rotate-180\" id=\"arrow\"></span></div></div><div class=\" leading-7 text-left text-sm font-thin mt-2 w-4/5 mx-auto\" id=\"submenu\"><h1 class=\"cursor-pointer p-2 hover:bg-gray-700 rounded-md mt-1\">Social</h1><h1 class=\"cursor-pointer p-2 hover:bg-gray-700 rounded-md mt-1\">Personal</h1><h1 class=\"cursor-pointer p-2 hover:bg-gray-700 rounded-md mt-1\">Friends</h1></div><div class=\"p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600\"><span class=\"text-[15px] ml-4 text-gray-200\">Logout</span></div></div></div></div>
+<body class=\"flex flex-col h-full bg-gray-600\"><script nonce=\"
+\">\n      if (window.location.hash && window.location.hash === '#_=_') {\n        if (window.history && window.history.replaceState) {\n          window.history.replaceState(\"\", document.title, window.location.pathname + window.location.search);\n        } else {\n          window.location.hash = '';\n        }\n      }\n    </script>
+<div class=\"flex-1 ml-64\"><div class=\"bg-blue-600 text-white p-4 flex justify-between items-center\"><div class=\"flex items-center\"><button class=\"text-white text-2xl focus:outline-none\"><i class=\"fas fa-bars\"></i></button> <span class=\"ml-4 text-xl font-bold\">LITD</span></div><div class=\"w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white\">S</div></div><div class=\"p-4\"><!-- Main content goes here -->
+</div></div></body>
+<body class=\"flex flex-col h-full\"><script nonce=\"
+\">\n      if (window.location.hash && window.location.hash === '#_=_') {\n        if (window.history && window.history.replaceState) {\n          window.history.replaceState(\"\", document.title, window.location.pathname + window.location.search);\n        } else {\n          window.location.hash = '';\n        }\n      }\n    </script>
+<main class=\"flex-1 container \">
+</main>
+</body>
 <nav class=\"bg-primary-600 p-4\"><div class=\"container flex justify-between\"><ol class=\"flex space-x-4\"><li><a class=\"text-gray-200\" href=\"/\">Home</a></li><li><a class=\"text-gray-200\" href=\"/about\">About</a></li></ol><ol class=\"flex space-x-4\">
 <li><button class=\"text-gray-200\" hx-target=\"body\" hx-swap=\"innerHTML\" hx-post=\"/logout\">Logout</button></li>
 <li><a class=\"text-gray-200\" href=\"/register\">Register</a></li><li><a class=\"text-gray-200\" href=\"/login\">Login</a></li>
 </ol></div></nav>
-<body class=\"flex flex-col h-full\">
-<main class=\"flex-1 container \">
-</main>
-</body>
+<footer class=\"bg-primary-600 p-4\"></footer>

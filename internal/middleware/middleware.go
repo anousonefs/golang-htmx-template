@@ -46,7 +46,7 @@ func CSPMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		c.SetRequest(c.Request().WithContext(ctx))
 
 		// Insert the nonces into the content security policy header
-		cspHeader := fmt.Sprintf("default-src 'self'; script-src 'nonce-%s' 'nonce-%s'; style-src 'nonce-%s' '%s';",
+		cspHeader := fmt.Sprintf("default-src 'self'; script-src 'nonce-%s' 'nonce-%s' 'unsafe-eval'; style-src 'nonce-%s' '%s';",
 			nonceSet.Htmx,
 			nonceSet.ResponseTargets,
 			nonceSet.Tw,
@@ -95,4 +95,13 @@ func GetResponseTargetsNonce(ctx context.Context) string {
 func GetTwNonce(ctx context.Context) string {
 	nonceSet := GetNonces(ctx)
 	return nonceSet.Tw
+}
+
+func CacheControlMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		c.Response().Header().Set("Pragma", "no-cache")
+		c.Response().Header().Set("Expires", "0")
+		return next(c)
+	}
 }

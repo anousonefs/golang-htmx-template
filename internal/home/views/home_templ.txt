@@ -1,1 +1,1 @@
-<p>Home page content</p>
+<p class=\"text-blue-200\">Home page content</p>

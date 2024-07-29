@@ -121,6 +121,7 @@ func newEchoServer(_ config.Config) *echo.Echo {
 	}
 	e := echo.New()
 	e.Use(mdw.CSPMiddleware)
+	e.Use(mdw.CacheControlMiddleware)
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
 	pwd, _ := os.Getwd()
