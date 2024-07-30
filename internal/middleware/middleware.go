@@ -19,6 +19,7 @@ type Nonces struct {
 	Htmx            string
 	ResponseTargets string
 	Tw              string
+	InlineStyle     string
 	HtmxCSSHash     string
 }
 
@@ -38,6 +39,7 @@ func CSPMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			Htmx:            generateRandomString(16),
 			ResponseTargets: generateRandomString(16),
 			Tw:              generateRandomString(16),
+			InlineStyle:     generateRandomString(16),
 			HtmxCSSHash:     "sha256-pgn1TCGZX6O77zDvy0oTODMOxemn0oj0LeCnQTRj7Kg=",
 		}
 
@@ -46,7 +48,7 @@ func CSPMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		c.SetRequest(c.Request().WithContext(ctx))
 
 		// Insert the nonces into the content security policy header
-		cspHeader := fmt.Sprintf("default-src 'self'; script-src 'nonce-%s' 'nonce-%s' 'unsafe-eval'; style-src 'nonce-%s' '%s';",
+		cspHeader := fmt.Sprintf("default-src 'self'; script-src 'nonce-%s' 'nonce-%s'; style-src 'nonce-%s' '%s';",
 			nonceSet.Htmx,
 			nonceSet.ResponseTargets,
 			nonceSet.Tw,

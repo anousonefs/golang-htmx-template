@@ -7,22 +7,61 @@ import (
 )
 
 templ Login() {
+  <script nonce={middleware.GetResponseTargetsNonce(ctx)}>
+      document.addEventListener('htmx:afterRequest', function (evt) {
+          if (evt.detail.xhr.status === 200) {
+              window.location.href = '/';
+          }
+      });
+  </script>
 	@Page(false, goth.User{}) {
-		<div class="flex flex-col justify-center items-center">
-			<h1 class="text-3xl font-bold text-center my-4">
-				Login
-			</h1>
-			<div>
-				<a href="/auth?provider=discord" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-					Login with Discord
-				</a>
-				<a href="/auth?provider=facebook" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-					Login with Facebook
-				</a>
-			</div>
-		</div>
+    <div class="flex items-center justify-center h-full bg-gray-900 bg-opacity-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-96">
+            <div class="text-center mb-4">
+                <img src="static/logo/iot.jpg" alt="logo" class="w-32 mx-auto">
+            </div>
+            <form hx-post="/web/login" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-gray-700">ຜູ້ໃຊ້</label>
+                    <input type="text" id="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="password" class="block text-gray-700">ລະຫັດຜ່ານ</label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+                        <button type="button" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-600">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="remember" name="remember" class="h-4 w-4 text-blue-600">
+                    <label for="remember" class="ml-2 text-gray-700">ຈົ່ມໄວ້ໃນລະບົບ</label>
+                </div>
+                <div>
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">ເຂົ້າລະບົບ</button>
+                </div>
+            </form>
+            <div class="text-center text-gray-700 mt-4">
+                <p>ຫຼືເຂົ້າລະບົບດ້ວຍ</p>
+                <div class="flex justify-center space-x-4 mt-2">
+                    <a href="/auth/facebook" class="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">Facebook</a>
+                    <a href="/auth/google" class="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded">Google</a>
+                    <a href="/auth/discord" class="bg-indigo-600 hover:bg-indigo-800 text-white font-bold py-2 px-4 rounded">Discord</a>
+                </div>
+            </div>
+            <div class="text-center text-gray-600 text-sm mt-4">
+                <p>ມີບັນຫາບັນຊີຂອງທ່ານ, ກະລຸນາຕິດຕໍ່ທີມງານລະບົບ AIDC ເພື່ອຂໍຄວາມຊ່ວຍເຫຼືອ</p>
+            </div>
+            <div class="text-center text-gray-600 text-xs mt-4">
+                <p>POWER BY LAOTEDEV</p>
+                <p>VERSION 1.0.0</p>
+            </div>
+        </div>
+    </div>
 	}
 }
+
 
 templ Page(nav bool, user goth.User) {
 	<!DOCTYPE html>
@@ -36,8 +75,17 @@ templ Page(nav bool, user goth.User) {
       <script src="static/script/response-targets.js" nonce={ middleware.GetResponseTargetsNonce(ctx) }></script>
 			<link rel="stylesheet" href="static/css/style.css" nonce={ middleware.GetTwNonce(ctx) }/>
 
+      <style nonce={middleware.GetTwNonce(ctx)}>
+        .my-bg-background {
+          background-image: url('/static/image/web-background.jpg');
+          background-size: cover;
+          background-position: center;
+        }
+      </style>
+
 		</head>
-		<body>
+
+    <body class="h-screen my-bg-background">
 			if nav {
 				<nav class="flex w-full bg-gray-800 text-blue-300 text-xl p-4">
 					<a href="/" class="ml-6">Home</a>
@@ -57,4 +105,22 @@ templ Page(nav bool, user goth.User) {
 			{ children... }
 		</body>
 	</html>
+}
+
+templ Login2() {
+	@Page(false, goth.User{}) {
+		<div class="flex flex-col justify-center items-center">
+			<h1 class="text-3xl font-bold text-center my-4">
+				Login
+			</h1>
+			<div>
+				<a href="/auth?provider=discord" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+					Login with Discord
+				</a>
+				<a href="/auth?provider=facebook" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+					Login with Facebook
+				</a>
+			</div>
+		</div>
+	}
 }

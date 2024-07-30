@@ -20,7 +20,9 @@ templ header(title string) {
 templ sidebar() {
         <div class="w-64 h-screen bg-gray-900 shadow-md fixed">
               <div class="p-4 text-gray-100 text-xl">
-                <img src="static/logo/iot.jpg" alt="AIDC Trading Logo" class="w-full mb-4">
+                <div class="bg-gray-300 h-64 w-full">
+                  <img src="static/logo/iot.jpg" alt="AIDC Trading Logo" class="w-full mb-4">
+                </div>
                 <div class="p-2.5 mt-1 flex items-center rounded-md ">
                   <h1 class="text-[15px]  ml-3 text-xl text-white font-bold">Tailwindbar</h1>
                 </div>
@@ -83,20 +85,27 @@ templ Layout(contents templ.Component, title string) {
 
        @sidebar()
         <div class="flex-1 ml-64">
-            <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+            <div class="bg-gray-900 text-white p-4 flex justify-between items-center">
                 <div class="flex items-center">
                     <button class="text-white text-2xl focus:outline-none">
                         <i class="fas fa-bars"></i>
                     </button>
                     <span class="ml-4 text-xl font-bold">LITD</span>
                 </div>
-                <div class="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white">
-                    S
+                <div class="flex direction-row reverse">
+                  <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-900">
+                      S
+                  </div>
+                  <div>
+                    <li>
+                      <a class="text-gray-200" href="/login">Login</a>
+                    </li>
+                  </div>
                 </div>
+
             </div>
 
             <div class="p-4">
-                <!-- Main content goes here -->
              @contents
             </div>
         </div>

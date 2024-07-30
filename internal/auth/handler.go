@@ -32,6 +32,7 @@ func (h handler) Install(e *echo.Echo) {
 	e.GET("/auth/callback", h.authCallback)
 
 	e.GET("/login", h.loginPage)
+	e.POST("/web/login", h.loginWeb)
 }
 
 func (h handler) loginPage(c echo.Context) error {
@@ -39,6 +40,32 @@ func (h handler) loginPage(c echo.Context) error {
 		return err
 	}
 	return nil
+}
+
+func (h handler) loginWeb(c echo.Context) error {
+	req := LoginRequest{
+		Email:    c.FormValue("email"),
+		Password: c.FormValue("password"),
+	}
+	if req.Email == "" || req.Password == "" {
+		hs := HttpStatusPbFromRPC(StatusBadRequest)
+		b, _ := protojson.Marshal(hs)
+		return c.JSONBlob(int(hs.Error.Code), b)
+	}
+	ctx := c.Request().Context()
+	res, err := h.auth.Login(ctx, req)
+	if err != nil {
+		hs := HttpStatusPbFromRPC(GRPCStatusFromErr(err))
+		b, _ := protojson.Marshal(hs)
+		return c.JSONBlob(int(hs.Error.Code), b)
+	}
+
+	if err := h.auth.SetCookie(c, res); err != nil {
+		logrus.Printf("loginWeb.StoreUserSession(): %v\n", err)
+		return c.String(http.StatusInternalServerError, "Error storing user session")
+	}
+
+	return c.NoContent(200)
 }
 
 func (h handler) login(c echo.Context) error {

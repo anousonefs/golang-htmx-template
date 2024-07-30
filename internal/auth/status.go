@@ -92,6 +92,16 @@ var StatusInternalServerError = func() *status.Status {
 	return s
 }()
 
+var StatusBadRequest = func() *status.Status {
+	s, _ := status.New(codes.InvalidArgument, "Invalid input. Please pass a valid values.").
+		WithDetails(
+			&edpb.ErrorInfo{
+				Reason: "INVALID_INPUT",
+				Domain: "e-doc",
+			})
+	return s
+}()
+
 func GRPCStatusFromErr(err error) *status.Status {
 	switch {
 	case err == nil:

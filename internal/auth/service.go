@@ -94,7 +94,12 @@ func (s *Service) SetCookie(c echo.Context, tokens LoginResponse) error {
 }
 
 func (s Service) Login(ctx context.Context, req LoginRequest) (res LoginResponse, err error) {
-	user, err := s.user.GetUser(ctx, user.FilterUser{Username: req.Username})
+	defer func() {
+		if err != nil {
+			logrus.Errorf("login(): %v\n", err)
+		}
+	}()
+	user, err := s.user.GetUser(ctx, user.FilterUser{Email: req.Email})
 	if err != nil {
 		return LoginResponse{}, err
 	}
