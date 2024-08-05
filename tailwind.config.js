@@ -5,7 +5,7 @@ module.exports = {
   content: [
     "internal/user/views/*.templ",
     "internal/templates/*.templ",
-    "internal/home/views/*.templ",
+    "internal/dashboard/views/*.templ",
     "internal/auth/views/*.templ",
   ],
   theme: {

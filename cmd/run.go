@@ -13,7 +13,7 @@ import (
 	"github.com/anousonefs/golang-htmx-template/internal/activity"
 	"github.com/anousonefs/golang-htmx-template/internal/auth"
 	"github.com/anousonefs/golang-htmx-template/internal/config"
-	"github.com/anousonefs/golang-htmx-template/internal/home"
+	home "github.com/anousonefs/golang-htmx-template/internal/dashboard"
 	mdw "github.com/anousonefs/golang-htmx-template/internal/middleware"
 	"github.com/anousonefs/golang-htmx-template/internal/user"
 	"github.com/gorilla/sessions"
