@@ -1,1 +1,1 @@
-golang + htmx + + templ + tailwindcss
+golang + htmx + templ + tailwindcss

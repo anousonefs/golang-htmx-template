@@ -19,6 +19,7 @@ type Nonces struct {
 	Htmx            string
 	ResponseTargets string
 	Tw              string
+	InlineStyle     string
 	HtmxCSSHash     string
 }
 
@@ -38,6 +39,7 @@ func CSPMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			Htmx:            generateRandomString(16),
 			ResponseTargets: generateRandomString(16),
 			Tw:              generateRandomString(16),
+			InlineStyle:     generateRandomString(16),
 			HtmxCSSHash:     "sha256-pgn1TCGZX6O77zDvy0oTODMOxemn0oj0LeCnQTRj7Kg=",
 		}
 
@@ -95,4 +97,13 @@ func GetResponseTargetsNonce(ctx context.Context) string {
 func GetTwNonce(ctx context.Context) string {
 	nonceSet := GetNonces(ctx)
 	return nonceSet.Tw
+}
+
+func CacheControlMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		c.Response().Header().Set("Pragma", "no-cache")
+		c.Response().Header().Set("Expires", "0")
+		return next(c)
+	}
 }

@@ -13,9 +13,11 @@ import (
 	"github.com/anousonefs/golang-htmx-template/internal/activity"
 	"github.com/anousonefs/golang-htmx-template/internal/auth"
 	"github.com/anousonefs/golang-htmx-template/internal/config"
-	"github.com/anousonefs/golang-htmx-template/internal/home"
+	home "github.com/anousonefs/golang-htmx-template/internal/dashboard"
 	mdw "github.com/anousonefs/golang-htmx-template/internal/middleware"
 	"github.com/anousonefs/golang-htmx-template/internal/user"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 
 	casbinPgAdapter "github.com/cychiuae/casbin-pg-adapter"
 	"github.com/labstack/echo/v4"
@@ -37,7 +39,7 @@ func Run() error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
 	defer cancel()
 
-	db, err := sql.Open(cfg.GetDBDriver(), cfg.DSNInfo())
+	db, err := sql.Open(cfg.DBDriver(), cfg.DSNInfo())
 	if err != nil {
 		return err
 	}
@@ -76,14 +78,21 @@ func Run() error {
 	userService := user.NewService(repo, activityService)
 	user.NewHandler(e, userService, cfg).Install(e, cfg)
 
-	authService := auth.NewService(userService, cfg.GetPasetoSecret())
+	sessionStore := auth.NewCookieStore(auth.SessionOptions{
+		CookiesKey: "mycookies7898",
+		MaxAge:     1000,
+		Secure:     false,
+		HttpOnly:   false,
+	})
+
+	authService := auth.NewService(userService, sessionStore, cfg)
 	auth.NewHandler(e, authService, cfg).Install(e)
 
 	homeService := home.NewService()
-	home.NewHandler(e, homeService).Install(e)
+	home.NewHandler(e, homeService).Install(e, cfg)
 
 	go func() {
-		errCh <- e.Start(":" + cfg.GetAppPort())
+		errCh <- e.Start(":" + cfg.AppPort())
 	}()
 
 	select {
@@ -112,6 +121,8 @@ func newEchoServer(_ config.Config) *echo.Echo {
 	}
 	e := echo.New()
 	e.Use(mdw.CSPMiddleware)
+	e.Use(mdw.CacheControlMiddleware)
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
 	pwd, _ := os.Getwd()
 	e.Static("static", fmt.Sprintf("%v/static", pwd))

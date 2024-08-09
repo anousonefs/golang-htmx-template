@@ -10,7 +10,6 @@ import (
 	"github.com/anousonefs/golang-htmx-template/internal/activity"
 	"github.com/anousonefs/golang-htmx-template/internal/config"
 	"github.com/anousonefs/golang-htmx-template/internal/middleware"
-	"github.com/anousonefs/golang-htmx-template/internal/templates"
 	"github.com/anousonefs/golang-htmx-template/internal/utils"
 
 	"github.com/labstack/echo/v4"
@@ -45,12 +44,27 @@ func (h *handler) Install(e *echo.Echo, cfg config.Config) {
 	permissions := e.Group("/api/v1/permissions", middleware.Auth(cfg)...)
 	permissions.GET("", h.listAllPermission)
 
-	e.GET("/users", h.usersPage)
+	page := e.Group("", middleware.Auth(cfg)...)
+	page.GET("/users", h.usersPage)
+	page.GET("/add-user", h.addUserPage)
+	page.POST("/users", h.createUserPage)
 }
 
 func (h *handler) usersPage(c echo.Context) error {
-	comp := UserPage()
-	if err := templates.Layout(comp, "My website").Render(c.Request().Context(), c.Response().Writer); err != nil {
+	users, err := h.user.ListUsers(c.Request().Context(), FilterUser{})
+	if err != nil {
+		hs := HttpStatusPbFromRPC(GRPCStatusFromErr(err))
+		b, _ := protojson.Marshal(hs)
+		return c.JSONBlob(int(hs.Error.Code), b)
+	}
+	if err := UserPage(users).Render(c.Request().Context(), c.Response().Writer); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (h *handler) addUserPage(c echo.Context) error {
+	if err := AddUserPage().Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return err
 	}
 	return nil
@@ -96,6 +110,38 @@ func (h *handler) createUser(c echo.Context) error {
 		return c.JSONBlob(int(hs.Error.Code), b)
 	}
 	return c.JSON(http.StatusCreated, echo.Map{"message": "created"})
+}
+
+func (h *handler) createUserPage(c echo.Context) error {
+	var act activity.Activity
+	req := User{
+		Email:        c.FormValue("email"),
+		RoleID:       c.FormValue("roleID"),
+		FirstName:    c.FormValue("firstName"),
+		LastName:     c.FormValue("lastName"),
+		Gender:       c.FormValue("gender"),
+		Phone:        c.FormValue("phone"),
+		DepartmentID: c.FormValue("departmentID"),
+		PositionID:   c.FormValue("positionID"),
+		Password:     c.FormValue("password"),
+	}
+	ctx := c.Request().Context()
+	req.CreatedBy = middleware.UserClaimFromContext(ctx).ID
+	fmt.Printf("context: %#v\n", middleware.UserClaimFromContext(ctx))
+	if err := req.Validate(); err != nil {
+		logrus.Errorf("req.Validate(): %v", err)
+		hs := HttpStatusPbFromRPC(StatusBadRequest)
+		b, _ := protojson.Marshal(hs)
+		return c.JSONBlob(int(hs.Error.Code), b)
+	}
+	act.CreatedBy = middleware.UserClaimFromContext(ctx).ID
+	act.DepartmentID = middleware.UserClaimFromContext(ctx).DepartmentID
+	if err := h.user.CreateUser(ctx, req, act); err != nil {
+		hs := HttpStatusPbFromRPC(GRPCStatusFromErr(err))
+		b, _ := protojson.Marshal(hs)
+		return c.JSONBlob(int(hs.Error.Code), b)
+	}
+	return c.NoContent(201)
 }
 
 func (h *handler) getUser(c echo.Context) error {

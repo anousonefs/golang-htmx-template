@@ -9,6 +9,9 @@ import (
 	"time"
 
 	"github.com/anousonefs/golang-htmx-template/internal/config"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
+	"github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -29,8 +32,8 @@ var (
 var DefaultPASETOConfig = PASETOConfig{
 	Skipper:     middleware.DefaultSkipper,
 	ContextKey:  "user",
-	TokenLookUp: "header:" + echo.HeaderAuthorization,
-	AuthScheme:  "Bearer",
+	TokenLookUp: "cookie:" + "access_token",
+	AuthScheme:  "",
 	Validators:  []paseto.Validator{},
 }
 
@@ -79,6 +82,18 @@ type PASETOConfig struct {
 	/* Redis *redis.Client */
 }
 
+func CheckCookie(sesssionName string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			if accessToken, refreshToken, err := GetCookies(c); err != nil || accessToken == "" || refreshToken == "" {
+				logrus.Errorf("GetCookies(): %v\n", err)
+				return c.Redirect(http.StatusTemporaryRedirect, "/login")
+			}
+			return next(c)
+		}
+	}
+}
+
 func PASETOWithConfig(config PASETOConfig) echo.MiddlewareFunc {
 	if len(config.SigningKey) != keySize {
 		log.Fatal("SigningKey must be 32 bytes length")
@@ -115,6 +130,7 @@ func PASETOWithConfig(config PASETOConfig) echo.MiddlewareFunc {
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) (err error) {
+
 			if config.Skipper(c) {
 				return next(c)
 			}
@@ -127,11 +143,11 @@ func PASETOWithConfig(config PASETOConfig) echo.MiddlewareFunc {
 			auth, err := extractor(c)
 			if err != nil {
 				fmt.Printf("extractor error: %v\n", err)
-				return err
+				return c.Redirect(http.StatusTemporaryRedirect, "/login")
 			}
 			if !strings.HasPrefix(auth, "v2.local") {
 				fmt.Printf("not support token: %v\n", err)
-				return ErrPASETOUnsupported
+				return c.Redirect(http.StatusTemporaryRedirect, "/login")
 			}
 
 			/* isBlackList, err := config.Redis.Exists(c.Request().Context(), auth).Result() */
@@ -148,6 +164,7 @@ func PASETOWithConfig(config PASETOConfig) echo.MiddlewareFunc {
 				err = claims.Validate(append(config.Validators, paseto.ValidAt(time.Now()))...)
 				if err == nil {
 					c.Set(config.ContextKey, claims)
+					println("set context key")
 					if config.SuccessHandler != nil {
 						config.SuccessHandler(c)
 					}
@@ -155,7 +172,7 @@ func PASETOWithConfig(config PASETOConfig) echo.MiddlewareFunc {
 				}
 			}
 			println("invalid or expired token")
-			return ErrUnauthorized
+			return c.Redirect(http.StatusTemporaryRedirect, "/login")
 		}
 	}
 }
@@ -203,6 +220,7 @@ func pasetoFromParam(param string) pasetoExtractor {
 
 func pasetoFromCookie(name string) pasetoExtractor {
 	return func(c echo.Context) (string, error) {
+		fmt.Printf("name: %v\n", name)
 		cookie, err := c.Cookie(name)
 		if err != nil {
 			return "", ErrPASETOMissing
@@ -215,13 +233,54 @@ func Auth(cfg config.Config) []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{
 		PASETOWithConfig(PASETOConfig{
 			Skipper:    func(c echo.Context) bool { return c.Path() == "/_healthz" },
-			SigningKey: cfg.GetPasetoSecret(),
+			SigningKey: cfg.PasetoSecret(),
 			ErrorHandlerWithContext: func(err error, c echo.Context) error {
 				httpStatus := HttpStatusPbFromRPC(GRPCStatusFromErr(err))
 				b, _ := protojson.Marshal(httpStatus)
 				return c.JSONBlob(int(httpStatus.Error.Code), b)
 			},
-		}),
+		},
+		),
 		SetClaimsMiddleware(),
 	}
+}
+
+func ValidateCookie(cfg config.Config) []echo.MiddlewareFunc {
+	return []echo.MiddlewareFunc{
+		CheckCookie(cfg.SessionName()),
+	}
+}
+
+func GetSessionUser(r *http.Request, sessionName string) (goth.User, error) {
+	session, err := gothic.Store.Get(r, sessionName)
+	if err != nil {
+		return goth.User{}, err
+	}
+
+	u := session.Values["user"]
+	if u == nil {
+		return goth.User{}, fmt.Errorf("user is not authenticated! %v", u)
+	}
+
+	return u.(goth.User), nil
+}
+
+func GetCookies(c echo.Context) (accessToken, refreshToken string, err error) {
+	accessTokenCookie, err := c.Cookie("access_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return "", "", fmt.Errorf("access token cookie not found")
+		}
+		return "", "", fmt.Errorf("error retrieving access token cookie: %v", err)
+	}
+
+	refreshTokenCookie, err := c.Cookie("refresh_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return "", "", fmt.Errorf("refresh token cookie not found")
+		}
+		return "", "", fmt.Errorf("error retrieving refresh token cookie: %v", err)
+	}
+
+	return accessTokenCookie.Value, refreshTokenCookie.Value, nil
 }

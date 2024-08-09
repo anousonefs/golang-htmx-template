@@ -3,12 +3,20 @@
 \"></script><script src=\"static/script/response-targets.js\" nonce=\"
 \"></script><link rel=\"stylesheet\" href=\"static/css/style.css\" nonce=\"
 \"></head>
-<footer class=\"bg-primary-600 p-4\"></footer>
+<div class=\"w-64 h-screen bg-blue-900 shadow-md fixed\"><div class=\"p-4 text-gray-100 text-xl\"><div class=\"bg-gray-300 h-64 w-full\"><img src=\"static/logo/iot.jpg\" alt=\"AIDC Trading Logo\" class=\"w-full mb-4\"></div><div><div class=\"p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600\" hx-get=\"
+\" hx-target=\"#main\"><span class=\"text-[15px] ml-4 text-gray-200\">Dashboard</span></div><div class=\"p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600\" hx-get=\"
+\" hx-target=\"#main\"><span class=\"text-[15px] ml-4 text-gray-200\">Users</span></div><hr class=\"my-4 text-gray-600\"><div class=\"p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600\"><span class=\"text-[15px] ml-4 text-gray-200\">Page</span></div><div class=\"p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600\"><i class=\"fas fa-search text-sm\"></i><div class=\"flex justify-between w-full items-center\" onclick=\"dropDown()\"><span class=\"text-[15px] ml-4 text-gray-200\">Message</span> <span class=\"text-sm rotate-180\" id=\"arrow\"></span></div></div></div></div></div>
+<body class=\"flex flex-col h-full\"><script nonce=\"
+\">\n      if (window.location.hash && window.location.hash === '#_=_') {\n        if (window.history && window.history.replaceState) {\n          window.history.replaceState(\"\", document.title, window.location.pathname + window.location.search);\n        } else {\n          window.location.hash = '';\n        }\n      }\n    </script>
+<div class=\"flex-1 ml-64\"><div class=\"text-black p-4 flex justify-between items-center shadow-lg\"><div class=\"flex items-center\"><button class=\"text-white text-2xl focus:outline-none\"><i class=\"fas fa-bars\"></i></button> <span class=\"ml-4 text-xl font-bold\">Drawer</span></div><div class=\"flex direction-row reverse\"><!-- <div class=\"w-8 h-8 bg-red rounded-full flex items-center justify-center text-black\"> --><!--     S --><!-- </div> --><div><li><a class=\"text-black\" href=\"/login\">Login</a></li></div></div></div><div class=\"p-4\" id=\"main\">
+</div></div></body>
+<body class=\"flex flex-col h-full\"><script nonce=\"
+\">\n      if (window.location.hash && window.location.hash === '#_=_') {\n        if (window.history && window.history.replaceState) {\n          window.history.replaceState(\"\", document.title, window.location.pathname + window.location.search);\n        } else {\n          window.location.hash = '';\n        }\n      }\n    </script>
+<main class=\"flex-1 container \">
+</main>
+</body>
 <nav class=\"bg-primary-600 p-4\"><div class=\"container flex justify-between\"><ol class=\"flex space-x-4\"><li><a class=\"text-gray-200\" href=\"/\">Home</a></li><li><a class=\"text-gray-200\" href=\"/about\">About</a></li></ol><ol class=\"flex space-x-4\">
 <li><button class=\"text-gray-200\" hx-target=\"body\" hx-swap=\"innerHTML\" hx-post=\"/logout\">Logout</button></li>
 <li><a class=\"text-gray-200\" href=\"/register\">Register</a></li><li><a class=\"text-gray-200\" href=\"/login\">Login</a></li>
 </ol></div></nav>
-<body class=\"flex flex-col h-full\">
-<main class=\"flex-1 container \">
-</main>
-</body>
+<footer class=\"bg-primary-600 p-4\"></footer>
