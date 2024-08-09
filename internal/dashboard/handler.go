@@ -20,19 +20,12 @@ func NewHandler(e *echo.Echo, home Service) *handler {
 
 func (h *handler) Install(e *echo.Echo, cfg config.Config) {
 	e.GET("/", h.homePage, middleware.Auth(cfg)...)
-	e.GET("/dashboard", h.dashboardPage, middleware.ValidateCookie(cfg)...)
+	e.GET("/dashboard", h.homePage, middleware.Auth(cfg)...)
 }
 
 func (h *handler) homePage(c echo.Context) error {
 	comp := DashboardPage()
 	if err := templates.Layout(comp, "hello").Render(c.Request().Context(), c.Response().Writer); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (h *handler) dashboardPage(c echo.Context) error {
-	if err := DashboardPage().Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return err
 	}
 	return nil

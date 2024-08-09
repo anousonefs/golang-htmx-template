@@ -26,10 +26,10 @@ templ sidebar() {
 
                 <div>
 
-                  <div class="p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600" hx-get={string(templ.URL("/dashboard"))} hx-target="#main">
+                  <div class="p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600" hx-get={string(templ.URL("/dashboard"))} hx-target="#body">
                     <span class="text-[15px] ml-4 text-gray-200">Dashboard</span>
                   </div>
-                  <div class="p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600" hx-get={string(templ.URL("/users"))} hx-target="#main">
+                  <div class="p-2.5 mt-2 flex items-center rounded-md px-4 duration-300 cursor-pointer  hover:bg-blue-600" hx-get={string(templ.URL("/users"))} hx-target="#body">
                     <span class="text-[15px] ml-4 text-gray-200">Users</span>
                   </div>
                   <hr class="my-4 text-gray-600">
@@ -55,7 +55,7 @@ templ sidebar() {
 
 templ Layout(contents templ.Component, title string) {
 	@header(title)
-	<body class="flex flex-col h-full">
+	<body id="body" class="flex flex-col h-full">
    <script nonce={ middleware.GetResponseTargetsNonce(ctx) }>
       if (window.location.hash && window.location.hash === '#_=_') {
         if (window.history && window.history.replaceState) {

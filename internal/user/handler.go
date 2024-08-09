@@ -10,6 +10,7 @@ import (
 	"github.com/anousonefs/golang-htmx-template/internal/activity"
 	"github.com/anousonefs/golang-htmx-template/internal/config"
 	"github.com/anousonefs/golang-htmx-template/internal/middleware"
+	"github.com/anousonefs/golang-htmx-template/internal/templates"
 	"github.com/anousonefs/golang-htmx-template/internal/utils"
 
 	"github.com/labstack/echo/v4"
@@ -57,7 +58,8 @@ func (h *handler) usersPage(c echo.Context) error {
 		b, _ := protojson.Marshal(hs)
 		return c.JSONBlob(int(hs.Error.Code), b)
 	}
-	if err := UserPage(users).Render(c.Request().Context(), c.Response().Writer); err != nil {
+	comp := UserPage(users)
+	if err := templates.Layout(comp, "users").Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return err
 	}
 	return nil
