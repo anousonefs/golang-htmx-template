@@ -2,7 +2,6 @@ package home
 
 import (
 	"github.com/anousonefs/golang-htmx-template/internal/config"
-	"github.com/anousonefs/golang-htmx-template/internal/dashboard/views"
 	"github.com/anousonefs/golang-htmx-template/internal/middleware"
 	"github.com/anousonefs/golang-htmx-template/internal/templates"
 
@@ -20,12 +19,12 @@ func NewHandler(e *echo.Echo, home Service) *handler {
 }
 
 func (h *handler) Install(e *echo.Echo, cfg config.Config) {
-	e.GET("/", h.homePage, middleware.ValidateCookie(cfg)...)
+	e.GET("/", h.homePage, middleware.Auth(cfg)...)
 	e.GET("/dashboard", h.dashboardPage, middleware.ValidateCookie(cfg)...)
 }
 
 func (h *handler) homePage(c echo.Context) error {
-	comp := views.DashboardPage()
+	comp := DashboardPage()
 	if err := templates.Layout(comp, "hello").Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return err
 	}
@@ -33,7 +32,7 @@ func (h *handler) homePage(c echo.Context) error {
 }
 
 func (h *handler) dashboardPage(c echo.Context) error {
-	if err := views.DashboardPage().Render(c.Request().Context(), c.Response().Writer); err != nil {
+	if err := DashboardPage().Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return err
 	}
 	return nil

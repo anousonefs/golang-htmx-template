@@ -32,8 +32,8 @@ var (
 var DefaultPASETOConfig = PASETOConfig{
 	Skipper:     middleware.DefaultSkipper,
 	ContextKey:  "user",
-	TokenLookUp: "header:" + echo.HeaderAuthorization,
-	AuthScheme:  "Bearer",
+	TokenLookUp: "cookie:" + "access_token",
+	AuthScheme:  "",
 	Validators:  []paseto.Validator{},
 }
 
@@ -143,11 +143,11 @@ func PASETOWithConfig(config PASETOConfig) echo.MiddlewareFunc {
 			auth, err := extractor(c)
 			if err != nil {
 				fmt.Printf("extractor error: %v\n", err)
-				return err
+				return c.Redirect(http.StatusTemporaryRedirect, "/login")
 			}
 			if !strings.HasPrefix(auth, "v2.local") {
 				fmt.Printf("not support token: %v\n", err)
-				return ErrPASETOUnsupported
+				return c.Redirect(http.StatusTemporaryRedirect, "/login")
 			}
 
 			/* isBlackList, err := config.Redis.Exists(c.Request().Context(), auth).Result() */
@@ -164,6 +164,7 @@ func PASETOWithConfig(config PASETOConfig) echo.MiddlewareFunc {
 				err = claims.Validate(append(config.Validators, paseto.ValidAt(time.Now()))...)
 				if err == nil {
 					c.Set(config.ContextKey, claims)
+					println("set context key")
 					if config.SuccessHandler != nil {
 						config.SuccessHandler(c)
 					}
@@ -171,7 +172,7 @@ func PASETOWithConfig(config PASETOConfig) echo.MiddlewareFunc {
 				}
 			}
 			println("invalid or expired token")
-			return ErrUnauthorized
+			return c.Redirect(http.StatusTemporaryRedirect, "/login")
 		}
 	}
 }
@@ -219,6 +220,7 @@ func pasetoFromParam(param string) pasetoExtractor {
 
 func pasetoFromCookie(name string) pasetoExtractor {
 	return func(c echo.Context) (string, error) {
+		fmt.Printf("name: %v\n", name)
 		cookie, err := c.Cookie(name)
 		if err != nil {
 			return "", ErrPASETOMissing

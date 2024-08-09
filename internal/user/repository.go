@@ -95,7 +95,6 @@ func (r Repo) createUser(ctx context.Context, req User) error {
 	query, args, err := config.Psql().
 		Insert("users").
 		Columns(
-			"username",
 			"role_id",
 			"first_name",
 			"last_name",
@@ -106,9 +105,10 @@ func (r Repo) createUser(ctx context.Context, req User) error {
 			"email",
 			"department_id",
 			"position_id",
+			"created_by",
+			"updated_by",
 		).
 		Values(
-			req.Username,
 			req.RoleID,
 			req.FirstName,
 			req.LastName,
@@ -119,6 +119,8 @@ func (r Repo) createUser(ctx context.Context, req User) error {
 			req.Email,
 			req.DepartmentID,
 			req.PositionID,
+			req.CreatedBy,
+			req.CreatedBy,
 		).
 		ToSql()
 	if err != nil {

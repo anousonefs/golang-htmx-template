@@ -24,7 +24,6 @@ func (r Repo) createActivity(ctx context.Context, req Activity) error {
 			"action",
 			"req_data",
 			"res_data",
-			"department_id",
 			"created_by",
 		).
 		Values(
@@ -33,7 +32,6 @@ func (r Repo) createActivity(ctx context.Context, req Activity) error {
 			req.Action,
 			req.ReqData,
 			req.ResData,
-			req.DepartmentID,
 			req.CreatedBy,
 		).
 		ToSql()

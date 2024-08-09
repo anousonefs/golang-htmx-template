@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/anousonefs/golang-htmx-template/internal/auth/views"
 	"github.com/anousonefs/golang-htmx-template/internal/config"
 	"github.com/markbates/goth/gothic"
 
@@ -36,7 +35,7 @@ func (h handler) Install(e *echo.Echo) {
 }
 
 func (h handler) loginPage(c echo.Context) error {
-	if err := views.Login().Render(c.Request().Context(), c.Response().Writer); err != nil {
+	if err := Login().Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return err
 	}
 	return nil
@@ -108,7 +107,7 @@ func (h handler) providerLogin(c echo.Context) error {
 	user, err := gothic.CompleteUserAuth(c.Response().Writer, c.Request())
 	fmt.Printf("user: %#v\n", user)
 	if err == nil {
-		if err := views.Login().Render(c.Request().Context(), c.Response().Writer); err != nil {
+		if err := Login().Render(c.Request().Context(), c.Response().Writer); err != nil {
 			logrus.Errorf("call view(): %v\n", err)
 			return err
 		}

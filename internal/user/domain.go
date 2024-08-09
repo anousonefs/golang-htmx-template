@@ -17,7 +17,6 @@ const (
 
 type User struct {
 	ID           string     `json:"id"`
-	Username     string     `json:"username"`
 	RoleID       string     `json:"roleID"`
 	TenantID     string     `json:"tenantID"`
 	Status       UserStatus `json:"status"`
@@ -84,7 +83,7 @@ type UserDetail struct {
 }
 
 func (f User) Validate() error {
-	if f.Username == "" || f.FirstName == "" || f.LastName == "" || f.Password == "" || f.Phone == "" || f.Email == "" {
+	if f.FirstName == "" || f.LastName == "" || f.Password == "" || f.Phone == "" || f.Email == "" {
 		return ErrBadRequest
 	}
 	return nil

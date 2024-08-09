@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/labstack/echo/v4"
 	"github.com/o1egl/paseto/v2"
@@ -44,11 +45,13 @@ func SetClaimsMiddleware() echo.MiddlewareFunc {
 			}
 			var user UserClaim
 			if err := claims.Get("user", &user); err != nil {
+				fmt.Printf("claims.Get():%v\n", err)
 				return next(c)
 			}
 			ctx := c.Request().Context()
 			ctx = context.WithValue(ctx, userClaimKey, user)
 			c.SetRequest(c.Request().WithContext(ctx))
+			fmt.Print("c.SetRequest()")
 			return next(c)
 		}
 	}
